@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+
+if [ -z "$1" ]; then
+  echo "Usage: $0 <config-filename>"
+  exit 1
+fi
+
+set -eu
+
+SELF="$0"
+SCRIPT=$(realpath "$SELF")
+ROOT_DIR=$(dirname "$SCRIPT")
+CONFIG_PATH="$ROOT_DIR/template_config/$1"
+
+if ! test -f $CONFIG_PATH; then
+  echo "Invalid config, $CONFIG_PATH does not exist."
+  exit 1
+fi
+RCARGO_CONFIG="$ROOT_DIR/.rcargo-config"
+cp $CONFIG_PATH $RCARGO_CONFIG
+
+. $RCARGO_CONFIG
+
+## Update config
+SED_PATTERNS=""
+echo "Enter the path to your project directory"
+echo "This is your local mirror to the remote's $REMOTE_DIR"
+read local_dir
+LOCAL_DIR_LINE=$(realpath $local_dir | sed 's/\//\\\//g')
+SED_PATTERNS+="-e s/LOCAL_DIR=\".*\"/LOCAL_DIR=\"$LOCAL_DIR_LINE\"/"
+
+sed -i "" $SED_PATTERNS $ROOT_DIR/.rcargo-config
+
+
+## Install into /usr/local/rcargo and /usr/local/bin
+echo "Installing rcargo to /usr/local/bin ..."
+sudo rsync -av $ROOT_DIR --exclude template_config --exclude install /usr/local
+ln -sf /usr/local/rcargo-cli/rcargo /usr/local/bin/rcargo
+
+
+## Finish
+INSTALLED_RCARGO_CONFIG="/usr/local/rcargo-cli/.rcargo-config"
+echo "Config ($INSTALLED_RCARGO_CONFIG):"
+cat $INSTALLED_RCARGO_CONFIG
+
+if [[ ! ":$PATH:" == *":/usr/local/bin:"* ]]; then
+  echo "/usr/local/bin is not added to your PATH. Please add it to your ~/.profile"
+  echo "Example snippet:"
+  echo "PATH=\"/usr/local/bin:\$PATH\""
+  echo ""
+  echo "Remember to '. ~/.profile' to update your PATH"
+fi

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+TEST_CMD="test"
+
+test_usage() {
+  basic_usage $TEST_CMD "$@"
+}
+
+test_cargo() {
+  basic_cargo_cmd $TEST_CMD "$@"
+}

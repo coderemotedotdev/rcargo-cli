@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+RUN_CMD="run"
+
+run_usage() {
+  basic_usage $RUN_CMD "$@"
+}
+
+run_cargo() {
+  basic_cargo_cmd $RUN_CMD "$@"
+}

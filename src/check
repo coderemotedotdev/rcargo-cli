@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+CHECK_CMD="check"
+
+check_usage() {
+  basic_usage $CHECK_CMD "$@"
+}
+
+check_cargo() {
+  basic_cargo_cmd $CHECK_CMD "$@"
+}

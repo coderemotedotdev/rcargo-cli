@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+sync_usage() {
+  cat << EOF
+
+  Usage:
+    rcargo sync <FLAG>
+    rcargo sync <SUBCOMMAND> [RSYNC_OPTIONS]
+
+  Flags:
+    -h, --help       show help message and exit
+
+  Subcommands:
+    help             show help message and exit
+
+    local-to-remote  rsync files from local to remote
+    remote-to-local  rsync files from remote to local
+
+  Rsync options:
+    --dry-run        show what would have been transferred
+
+EOF
+}
+
+sync_local_to_remote() {
+  source_rcargo_config
+  # Use a list instead of an overly complex delimited string for rsync options 
+  EXCLUDES=("${LOCAL_TO_REMOTE_SYNC_EXCLUDE[@]/#/--exclude=}")
+  RSYNC_OPTIONS=("-avzh" "${EXCLUDES[@]}" "$@")
+
+  echo "rsync ${RSYNC_OPTIONS[@]} $LOCAL_DIR/ $USER@$REMOTE_HOSTNAME:$REMOTE_DIR"
+  rsync "${RSYNC_OPTIONS[@]}" "$LOCAL_DIR/" "$USER@$REMOTE_HOSTNAME:$REMOTE_DIR"
+}
+
+sync_remote_to_local() {
+  source_rcargo_config
+  # Use a list instead of an overly complex delimited string for rsync options 
+  EXCLUDES=("${REMOTE_TO_LOCAL_SYNC_EXCLUDE[@]/#/--exclude=}")
+  RSYNC_OPTIONS=("-avzh" "${EXCLUDES[@]}" "$@")
+
+  echo "rsync ${RSYNC_OPTIONS[@]} $USER@$REMOTE_HOSTNAME:$REMOTE_DIR/ $LOCAL_DIR"
+  rsync "${RSYNC_OPTIONS[@]}" "$USER@$REMOTE_HOSTNAME:$REMOTE_DIR/" "$LOCAL_DIR"
+}

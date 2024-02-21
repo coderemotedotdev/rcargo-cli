@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+BUILD_CMD="build"
+
+build_usage() {
+  basic_usage $BUILD_CMD "$@"
+}
+
+build_cargo() {
+  basic_cargo_cmd $BUILD_CMD "$@"
+}

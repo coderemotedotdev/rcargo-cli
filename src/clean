@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+CLEAN_CMD="clean"
+
+clean_usage() {
+  cat << EOF
+
+  Usage:
+    rcargo clean <FLAG>
+    rcargo clean <SUBCOMMAND> [CARGO FLAGS]
+
+  Flags:
+    -h, --help       show help message and exit
+
+  Subcommands:
+    help             show help message and exit
+
+    all              remove the target directory
+    macro-cache      remove macro expansion cache files
+
+    Clean out the macro-cache if you see compile errors
+    related to proc macros, or for any 'MemDecoder' errors
+
+EOF
+}
+
+clean_cargo_all() {
+  basic_cargo_cmd $CLEAN_CMD "$@"
+}
+
+clean_cargo_macro_cache() {
+  source_rcargo_config
+  target_dir_arg=$(echo "$@" | grep -o "\--target-dir [^ ]*" | awk '{ print $2 }')
+  target_dir=${target_dir_arg:-"target-remote"}
+  ssh -tt $USER@$REMOTE_HOSTNAME "
+    echo "Remotely cleaning macro cache"
+    rm -vf $REMOTE_DIR/$target_dir/debug/incremental/expanded-procmacro-*.bin
+    exit
+  "
+}

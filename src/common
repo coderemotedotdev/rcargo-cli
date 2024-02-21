@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+bold() {
+  tput bold
+}
+
+normal() {
+  tput sgr0
+}
+
+header() {
+  bold && printf "\n  >> $1\n" && normal
+}
+
+basic_usage() {
+  local cmd=$1
+  cat << EOF
+
+  Usage:
+    rcargo $cmd <FLAG>
+    rcargo $cmd [CARGO FLAGS]
+
+  Flags:
+    -h, --help     show help message and exit
+
+EOF
+}
+
+
+basic_cargo_cmd() {
+  local cmd=$1
+  shift
+  local args="$@"
+  source_rcargo_config
+  ssh -tt $USER@$REMOTE_HOSTNAME "
+    cd $REMOTE_DIR 
+    echo "Remotely executing: cargo $cmd $args"
+    $REMOTE_CARGO_WRAPPER $cmd $args
+    exit
+  "
+}
+
+source_rcargo_config() {
+  if [ -e .rcargo-config ]
+  then
+      echo "Using the config (override) at $PWD/.rcargo-config"
+      . ./.rcargo-config
+  else
+      echo "Using the config (default) at $ROOT_DIR/.rcargo-config"
+      . $ROOT_DIR/.rcargo-config
+  fi
+}
+
