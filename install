@@ -2,7 +2,7 @@
 
 
 if [ -z "$1" ]; then
-  echo "Usage: $0 <config-filename>"
+  echo "Usage: $0 </path/to/config_filename>"
   exit 1
 fi
 
@@ -11,7 +11,7 @@ set -eu
 SELF="$0"
 SCRIPT=$(realpath "$SELF")
 ROOT_DIR=$(dirname "$SCRIPT")
-CONFIG_PATH="$ROOT_DIR/template_config/$1"
+CONFIG_PATH="$1"
 
 if ! test -f $CONFIG_PATH; then
   echo "Invalid config, $CONFIG_PATH does not exist."
@@ -24,10 +24,15 @@ cp $CONFIG_PATH $RCARGO_CONFIG
 
 ## Update config
 SED_PATTERNS=""
-echo "Enter the path to your project directory"
+echo "Enter the path to your project directory (defaults to '$LOCAL_DIR')"
 echo "This is your local mirror to the remote's $REMOTE_DIR"
 read local_dir
-LOCAL_DIR_LINE=$(realpath $local_dir | sed 's/\//\\\//g')
+if [ -z "$local_dir" ]
+then
+  local_dir=$LOCAL_DIR
+fi
+LOCAL_DIR=$(realpath $local_dir)
+LOCAL_DIR_LINE=$(echo $LOCAL_DIR | sed 's/\//\\\//g')
 SED_PATTERNS+="-e s/LOCAL_DIR=\".*\"/LOCAL_DIR=\"$LOCAL_DIR_LINE\"/"
 
 sed -i "" $SED_PATTERNS $ROOT_DIR/.rcargo-config

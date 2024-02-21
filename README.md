@@ -35,7 +35,7 @@ Check the `template_config` directory for sample configuration files. After inst
 ## Install
 If your project's template config is not already in the `template_config` directory, please create one first. Following is a sample installation for the gear project.
 ```bash
-git clone https://github.com/kapilsinha/rcargo-cli && ./rcargo-cli/install "gear_kapil.template"
+git clone https://github.com/kapilsinha/rcargo-cli && ./rcargo-cli/install ./rcargo-cli/template_config/gear_ukint.template
 
 Enter the path to your project directory
 This is your local mirror to the remote's /home/kapil/Desktop/gear

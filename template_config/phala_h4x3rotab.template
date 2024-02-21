@@ -1,9 +1,9 @@
-m#!/usr/bin/env bash
+#!/usr/bin/env bash
 
 # Username and group on remote machine
-USER="kapil"
-GROUP="gear"
-REMOTE_HOSTNAME="100.102.143.31"
+USER="h4x3rotab"
+GROUP="phala"
+REMOTE_HOSTNAME="65.109.97.48"
 
 DEFAULT_SYNC_EXCLUDE=(
     ".vscode"
@@ -21,10 +21,6 @@ DEFAULT_SYNC_EXCLUDE=(
 LOCAL_TO_REMOTE_SYNC_EXCLUDE=(
     "${DEFAULT_SYNC_EXCLUDE[@]}"
     ".rcargo-config"
-    # Remote override to fix compilation when feature "fuzz" is enabled
-    "runtime/vara/src/lib.rs"
-    # Remote override to allow custom rustup toolchain
-    "utils/wasm-builder/src/cargo_toolchain.rs"
 )
 REMOTE_TO_LOCAL_SYNC_EXCLUDE=(
     "${DEFAULT_SYNC_EXCLUDE[@]}"
@@ -32,10 +28,10 @@ REMOTE_TO_LOCAL_SYNC_EXCLUDE=(
 )
 
 # Absolute path on remote machine
-REMOTE_DIR="/home/kapil/Desktop/gear"
+REMOTE_DIR="/home/$GROUP/$USER/phala-blockchain"
 # CARGO_WRAPPER on remote machine
-REMOTE_CARGO_WRAPPER=$REMOTE_DIR/cargo_wrapper
+REMOTE_CARGO_WRAPPER="$REMOTE_DIR/cargo_wrapper"
 
 ### User-added section (from install script) ###
 # Absolute path on local machine
-LOCAL_DIR="/Users/kapilsinha/Desktop/gear"
+LOCAL_DIR="/placeholder/path/to/local_dir"
