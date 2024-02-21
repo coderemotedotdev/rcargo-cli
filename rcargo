@@ -32,6 +32,7 @@ rcargo_usage() {
 
     build         Compile the current package
     check         Analyze the current package and report errors, but don't build object files
+    clean         Remove artifacts that cargo has generated in the past
     run           Run a binary or example of the local package
     sync          Sync local repository to remote, or vice versa
     test          Execute all unit and integration tests and build examples of a local package
