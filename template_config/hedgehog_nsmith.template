@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Username and group on remote machine
+USER="nsmith"
+GROUP="hedgehog"
+REMOTE_HOSTNAME="65.109.97.48"
+
+DEFAULT_SYNC_EXCLUDE=(
+    ".vscode"
+    ".DS_Store"
+    ".idea"
+    ".git*"
+    ".env"
+    "target*"
+    "node_modules"
+    "log"
+    "*.out"
+    "*.mm_profdata"
+    "*.swp"
+)
+LOCAL_TO_REMOTE_SYNC_EXCLUDE=(
+    "${DEFAULT_SYNC_EXCLUDE[@]}"
+    ".rcargo-config"
+)
+REMOTE_TO_LOCAL_SYNC_EXCLUDE=(
+    "${DEFAULT_SYNC_EXCLUDE[@]}"
+    "cargo_wrapper"
+)
+
+# Absolute path on remote machine
+REMOTE_DIR="/home/$GROUP/$USER/hedgehog/hedgehog-rust-server"
+# CARGO_WRAPPER on remote machine
+REMOTE_CARGO_WRAPPER="$REMOTE_DIR/cargo_wrapper"
+
+### User-added section (from install script) ###
+# Absolute path on local machine
+LOCAL_DIR="/placeholder/path/to/local_dir"
