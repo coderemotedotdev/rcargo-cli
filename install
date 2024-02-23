@@ -44,8 +44,8 @@ fi
 
 ## Install into /usr/local/rcargo and /usr/local/bin
 echo "Installing rcargo to /usr/local/bin ..."
-sudo rsync -av $ROOT_DIR --exclude template_config --exclude install /usr/local
-ln -sf /usr/local/rcargo-cli/rcargo /usr/local/bin/rcargo
+sudo rsync -av $ROOT_DIR --exclude template_config --exclude install --exclude .git --exclude .gitignore /usr/local
+sudo ln -sf /usr/local/rcargo-cli/rcargo /usr/local/bin/rcargo
 
 
 ## Finish
