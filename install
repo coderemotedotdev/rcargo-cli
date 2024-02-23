@@ -35,7 +35,11 @@ LOCAL_DIR=$(realpath $local_dir)
 LOCAL_DIR_LINE=$(echo $LOCAL_DIR | sed 's/\//\\\//g')
 SED_PATTERNS+="-e s/LOCAL_DIR=\".*\"/LOCAL_DIR=\"$LOCAL_DIR_LINE\"/"
 
-sed -i "" $SED_PATTERNS $ROOT_DIR/.rcargo-config
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  sed -i "" $SED_PATTERNS $ROOT_DIR/.rcargo-config
+else
+  sed -i $SED_PATTERNS $ROOT_DIR/.rcargo-config
+fi
 
 
 ## Install into /usr/local/rcargo and /usr/local/bin
