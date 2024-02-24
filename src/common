@@ -17,24 +17,54 @@ basic_usage() {
   cat << EOF
 
   Usage:
-    rcargo $cmd <FLAG>
-    rcargo $cmd [CARGO FLAGS]
+    rcargo $cmd <FLAG> [CARGO FLAGS]
 
   Flags:
-    -h, --help     show help message and exit
+    -h, --help       show help message and exit
+    -e <VAR=value>   set environment variables
 
 EOF
 }
 
-
 basic_cargo_cmd() {
   local cmd=$1
   shift
+  
+  # Parse env vars
+  exports=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -e)
+        if [[ -n $2 ]]; then
+          VAR=$(echo "$2" | cut -d'=' -f1)
+          VALUE=$(echo "$2" | cut -d'=' -f2)
+
+          exports+="$VAR=$VALUE "
+          shift
+        else
+          echo "Error: Missing value for -e option"
+          exit 1
+        fi
+        ;;
+      *)
+        # If not -e option, exit
+        break
+        ;;
+    esac
+    shift
+  done
+  if [ -z "$exports" ]; then
+    should_export=false
+  else
+    should_export=true
+  fi
+
   local args="$@"
   source_rcargo_config
   ssh -tt $USER@$REMOTE_HOSTNAME "
     cd $REMOTE_DIR 
     echo "Remotely executing: cargo $cmd $args"
+    $should_export && export $exports && echo "export $exports"
     $REMOTE_CARGO_WRAPPER $cmd $args
     exit
   "
@@ -43,11 +73,11 @@ basic_cargo_cmd() {
 source_rcargo_config() {
   if [ -e .rcargo-config ]
   then
-      echo "Using the config (override) at $PWD/.rcargo-config"
-      . ./.rcargo-config
+    echo "Using the config (override) at $PWD/.rcargo-config"
+    . ./.rcargo-config
   else
-      echo "Using the config (default) at $ROOT_DIR/.rcargo-config"
-      . $ROOT_DIR/.rcargo-config
+    echo "Using the config (default) at $ROOT_DIR/.rcargo-config"
+    . $ROOT_DIR/.rcargo-config
   fi
 }
 
