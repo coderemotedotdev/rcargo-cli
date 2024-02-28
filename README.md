@@ -19,13 +19,13 @@ rcargo
   Commands:
     help          show help message and exit
 
-    build         Compile the current package
-    check         Analyze the current package and report errors, but don't build object files
+    build, b      Compile the current package
+    check, c      Analyze the current package and report errors, but don't build object files
     clean         Remove artifacts that cargo has generated in the past
-    run           Run a binary or example of the local package
+    run, r        Run a binary or example of the local package
     session       Manage multiple development sessions i.e. git branches
     sync          Sync local repository to remote, or vice versa
-    test          Execute all unit and integration tests and build examples of a local package
+    test, t       Execute all unit and integration tests and build examples of a local package
 
   Try rcargo <COMMAND> -h (or --help) to learn more about each command.
   Default config is located at /usr/local/rcargo-cli/.rcargo/config
