@@ -5,12 +5,16 @@ set -e
 SELF="$0"
 SCRIPT=$(realpath "$SELF")
 ROOT_DIR=$(dirname "$SCRIPT")
+RCARGO_DIR=".rcargo"
+RCARGO_CONFIG_LOCAL="$RCARGO_DIR/config"
+ACTIVE_BRANCHES_FILE="$RCARGO_DIR/active_branches.txt"
 
 . $ROOT_DIR/src/build
 . $ROOT_DIR/src/check
 . $ROOT_DIR/src/clean
 . $ROOT_DIR/src/common
 . $ROOT_DIR/src/run
+. $ROOT_DIR/src/session
 . $ROOT_DIR/src/sync
 . $ROOT_DIR/src/test
 
@@ -34,11 +38,12 @@ rcargo_usage() {
     check         Analyze the current package and report errors, but don't build object files
     clean         Remove artifacts that cargo has generated in the past
     run           Run a binary or example of the local package
+    session       Manage multiple development sessions i.e. git branches
     sync          Sync local repository to remote, or vice versa
     test          Execute all unit and integration tests and build examples of a local package
 
   Try rcargo <COMMAND> -h (or --help) to learn more about each command.
-  Default config is located at $ROOT_DIR/.rcargo-config
+  Default config is located at $ROOT_DIR/$RCARGO_CONFIG_LOCAL
 
 EOF
 }
@@ -109,6 +114,26 @@ case "$COMMAND" in
         run_cargo "$@"; ;;
     esac;;
     
+  session)
+    case "$MAYBE_SUBCOMMAND" in
+      "" | -h | --help | help)
+        session_usage
+        exit; ;;
+
+      show)
+        shift
+        session_show  "$@"; ;;
+
+      remove)
+        shift
+        session_remove  "$@"; ;;
+
+      *)
+        header  "Unknown option: '$MAYBE_SUBCOMMAND'"
+        format_usage
+        exit 1; ;;
+    esac;;
+  
   sync)
     case "$MAYBE_SUBCOMMAND" in
       "" | -h | --help | help)

@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+MAX_ACTIVE_SESSIONS=4
+
+session_usage() {
+  cat << EOF
+
+  Usage:
+    rcargo session <FLAG>
+    rcargo session <SUBCOMMAND>
+
+  Flags:
+    -h, --help         show help message and exit
+
+  Subcommands:
+    help               show help message and exit
+
+    show               show active remote sessions and current local session
+    remove <session>   remove an active session
+
+EOF
+}
+
+session_show() {
+  source_rcargo_config
+  touch $ACTIVE_BRANCHES_FILE
+  bold && echo "Active remote sessions:" && normal
+  cat $ACTIVE_BRANCHES_FILE
+  echo ""
+  bold && echo "Current local session:" && normal
+  echo "> $(session_internal_cur_session)"
+}
+
+session_internal_add_cur_session_to_active_file() {
+  source_rcargo_config
+  touch $ACTIVE_BRANCHES_FILE
+
+  local cur_session=$(session_internal_cur_session)
+  if ! grep -q "^${cur_session}$" $ACTIVE_BRANCHES_FILE; then
+    local num_active_sessions=$(($(wc -l < $ACTIVE_BRANCHES_FILE)))
+    if [ "$num_active_sessions" -ge "$MAX_ACTIVE_SESSIONS" ]; then
+      echo -e "You are already at the maximum of $MAX_ACTIVE_SESSIONS active sessions. \n"
+      echo "Please delete a session via 'rcargo session remove <session>' and try again."
+      exit 1
+    fi
+    # Add cur branch if it doesn't exist in active branches
+    echo $cur_session >> $ACTIVE_BRANCHES_FILE
+  fi
+}
+
+session_internal_cur_session() {
+  git symbolic-ref --short HEAD
+}
+
+session_remove() {
+  if [ "$#" -ne "1" ]; then
+    echo "Please specify a session after 'remove'"
+    session_usage
+    exit 1
+  fi
+
+  source_rcargo_config
+  touch $ACTIVE_BRANCHES_FILE
+
+  local sess_to_remove=$1
+  if ! grep -q "^${sess_to_remove}$" $ACTIVE_BRANCHES_FILE; then
+    echo "${sess_to_remove} is not an active session. Please remove one of the following:"
+    session_show
+    exit 1
+  fi
+
+  local sed_pattern="\|^${sess_to_remove}\$|d"
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i "" $sed_pattern $ACTIVE_BRANCHES_FILE
+  else
+    sed -i $sed_pattern $ACTIVE_BRANCHES_FILE
+  fi
+
+  echo -e "Removed session $sess_to_remove \n"
+  session_show
+}

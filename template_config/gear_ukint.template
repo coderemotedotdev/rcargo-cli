@@ -20,7 +20,7 @@ DEFAULT_SYNC_EXCLUDE=(
 )
 LOCAL_TO_REMOTE_SYNC_EXCLUDE=(
     "${DEFAULT_SYNC_EXCLUDE[@]}"
-    ".rcargo-config"
+    ".rcargo"
     # Remote override to fix compilation when feature "fuzz" is enabled
     "runtime/vara/src/lib.rs"
     # Remote override to allow custom rustup toolchain
@@ -36,6 +36,15 @@ REMOTE_DIR="/home/$GROUP/$USER/gear"
 # CARGO_WRAPPER on remote machine
 REMOTE_CARGO_WRAPPER="$REMOTE_DIR/cargo_wrapper"
 
+
 ### User-added section (from install script) ###
 # Absolute path on local machine
 LOCAL_DIR="/placeholder/path/to/local_dir"
+
+# Automatically switches "session" on the remote machine for concurrent
+# development on multiple git branches (avoids rebuild when you switch branches)
+GIT_SESSION_MANAGER=false
+
+# Syncs files from local to remote automatically before every cargo command i.e.
+# performs `rcargo sync local-to-remote` before cargo check, build, etc.
+AUTO_LOCAL_TO_REMOTE_SYNC_BEFORE_CARGO_CMD=false

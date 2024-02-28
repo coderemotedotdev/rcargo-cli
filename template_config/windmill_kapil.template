@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Username and group on remote machine
-USER="h4x3rotab"
-GROUP="phala"
+USER="kapil"
+GROUP="koingaroo"
 REMOTE_HOSTNAME="65.109.97.48"
 
 DEFAULT_SYNC_EXCLUDE=(
@@ -28,19 +28,19 @@ REMOTE_TO_LOCAL_SYNC_EXCLUDE=(
 )
 
 # Absolute path on remote machine
-REMOTE_DIR="/home/$GROUP/$USER/phala-blockchain"
+REMOTE_DIR="/home/$GROUP/$USER/windmill/backend"
 # CARGO_WRAPPER on remote machine
 REMOTE_CARGO_WRAPPER="$REMOTE_DIR/cargo_wrapper"
 
 
 ### User-added section (from install script) ###
 # Absolute path on local machine
-LOCAL_DIR="/placeholder/path/to/local_dir"
+LOCAL_DIR="/Users/kapilsinha/Desktop/windmill/backend"
 
 # Automatically switches "session" on the remote machine for concurrent
 # development on multiple git branches (avoids rebuild when you switch branches)
-GIT_SESSION_MANAGER=false
+GIT_SESSION_MANAGER=true
 
 # Syncs files from local to remote automatically before every cargo command i.e.
 # performs `rcargo sync local-to-remote` before cargo check, build, etc.
-AUTO_LOCAL_TO_REMOTE_SYNC_BEFORE_CARGO_CMD=false
+AUTO_LOCAL_TO_REMOTE_SYNC_BEFORE_CARGO_CMD=true

@@ -26,7 +26,29 @@ basic_usage() {
 EOF
 }
 
-basic_cargo_cmd() {
+basic_cargo_cmd_wrapper() {
+  # Order of operations matters!
+  source_rcargo_config
+  
+  if [ "$GIT_SESSION_MANAGER" = true ]; then
+    session_internal_add_cur_session_to_active_file
+    local cur_session=$(session_internal_cur_session)
+    local active_branches=$(tr '\n' ' ' < $ACTIVE_BRANCHES_FILE)
+    ssh -tt $USER@$REMOTE_HOSTNAME "
+      cd $REMOTE_DIR
+      echo "Switching remote session to $cur_session..."
+      python3 /home/shared/switch_project_session.py --selected-session "$cur_session" --active-sessions "$active_branches"
+    "
+  fi
+
+  if [ "$AUTO_LOCAL_TO_REMOTE_SYNC_BEFORE_CARGO_CMD" = true ]; then
+    sync_local_to_remote
+  fi
+
+  basic_internal_cargo_cmd "$@"
+}
+
+basic_internal_cargo_cmd() {
   local cmd=$1
   shift
   
@@ -60,7 +82,8 @@ basic_cargo_cmd() {
   fi
 
   local args="$@"
-  source_rcargo_config
+  # Now that we do multiple ssh's, we should consider reusing ssh connections
+  # e.g. https://stackoverflow.com/questions/20410252/how-to-reuse-an-ssh-connection
   ssh -tt $USER@$REMOTE_HOSTNAME "
     cd $REMOTE_DIR 
     echo "Remotely executing: cargo $cmd $args"
@@ -71,13 +94,9 @@ basic_cargo_cmd() {
 }
 
 source_rcargo_config() {
-  if [ -e .rcargo-config ]
-  then
-    echo "Using the config (override) at $PWD/.rcargo-config"
-    . ./.rcargo-config
-  else
-    echo "Using the config (default) at $ROOT_DIR/.rcargo-config"
-    . $ROOT_DIR/.rcargo-config
+  if [ ! -d $RCARGO_DIR ]; then
+    cp -r "$ROOT_DIR/$RCARGO_DIR" .
+    echo "Initialized config at $PWD/$RCARGO_CONFIG_LOCAL (copied from $ROOT_DIR/$RCARGO_CONFIG_LOCAL)"
   fi
+  . $RCARGO_CONFIG_LOCAL
 }
-

@@ -7,5 +7,5 @@ check_usage() {
 }
 
 check_cargo() {
-  basic_cargo_cmd $CHECK_CMD "$@"
+  basic_cargo_cmd_wrapper $CHECK_CMD "$@"
 }

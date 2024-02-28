@@ -6,7 +6,27 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-set -eu
+get_confirmation_prompt() {
+  input=$1
+  if [[ $input = true ]]; then
+    echo "Y/n"
+  else
+    echo "y/N"
+  fi
+}
+
+parse_confirmation_input() {
+  local input="$1"
+  local default="$2"
+  case $input in
+    y|Y) echo true ;;
+    n|N) echo false ;;
+    *) echo $default ;;
+  esac
+}
+
+
+set -e
 
 SELF="$0"
 SCRIPT=$(realpath "$SELF")
@@ -17,8 +37,9 @@ if ! test -f $CONFIG_PATH; then
   echo "Invalid config, $CONFIG_PATH does not exist."
   exit 1
 fi
-RCARGO_CONFIG="$ROOT_DIR/.rcargo-config"
-cp $CONFIG_PATH $RCARGO_CONFIG
+RCARGO_CONFIG_LOCAL=".rcargo/config"
+RCARGO_CONFIG="$ROOT_DIR/$RCARGO_CONFIG_LOCAL"
+mkdir -p ".rcargo" && cp $CONFIG_PATH $RCARGO_CONFIG
 
 . $RCARGO_CONFIG
 
@@ -33,14 +54,27 @@ then
 fi
 LOCAL_DIR=$(realpath $local_dir)
 LOCAL_DIR_LINE=$(echo $LOCAL_DIR | sed 's/\//\\\//g')
-SED_PATTERNS+="-e s/LOCAL_DIR=\".*\"/LOCAL_DIR=\"$LOCAL_DIR_LINE\"/"
+SED_PATTERNS+="-e s/LOCAL_DIR=\".*\"/LOCAL_DIR=\"$LOCAL_DIR_LINE\"/ "
+
+echo -e "\nGit session manager automatically changes your remote workspace's 'session' based on your local git branch. "
+echo "This can help if you tend to concurrently develop on multiple branches."
+echo -n "Enable git session manager? ($(get_confirmation_prompt $GIT_SESSION_MANAGER))  "
+read enable_git_session_manager
+git_session_manager=$(parse_confirmation_input "$enable_git_session_manager" "$GIT_SESSION_MANAGER")
+SED_PATTERNS+="-e s/GIT_SESSION_MANAGER=.*/GIT_SESSION_MANAGER=$git_session_manager/ "
+
+echo -e "\nAuto-sync will rsync your local files to the remote machine before every cargo command. "
+echo "NOTE: Only use this if you do not use remote development, or you will lose your remote changes!"
+echo -n "Enable auto-sync? ($(get_confirmation_prompt $AUTO_LOCAL_TO_REMOTE_SYNC_BEFORE_CARGO_CMD))  "
+read enable_auto_sync
+auto_sync=$(parse_confirmation_input "$enable_auto_sync" "$AUTO_LOCAL_TO_REMOTE_SYNC_BEFORE_CARGO_CMD")
+SED_PATTERNS+="-e s/AUTO_LOCAL_TO_REMOTE_SYNC_BEFORE_CARGO_CMD=.*/AUTO_LOCAL_TO_REMOTE_SYNC_BEFORE_CARGO_CMD=$auto_sync/ "
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  sed -i "" $SED_PATTERNS $ROOT_DIR/.rcargo-config
+  sed -i "" $SED_PATTERNS $RCARGO_CONFIG
 else
-  sed -i $SED_PATTERNS $ROOT_DIR/.rcargo-config
+  sed -i $SED_PATTERNS $RCARGO_CONFIG
 fi
-
 
 ## Install into /usr/local/rcargo and /usr/local/bin
 echo "Installing rcargo to /usr/local/bin ..."
@@ -49,7 +83,7 @@ sudo ln -sf /usr/local/rcargo-cli/rcargo /usr/local/bin/rcargo
 
 
 ## Finish
-INSTALLED_RCARGO_CONFIG="/usr/local/rcargo-cli/.rcargo-config"
+INSTALLED_RCARGO_CONFIG="/usr/local/rcargo-cli/$RCARGO_CONFIG_LOCAL"
 echo "Config ($INSTALLED_RCARGO_CONFIG):"
 cat $INSTALLED_RCARGO_CONFIG
 

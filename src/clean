@@ -25,7 +25,7 @@ EOF
 }
 
 clean_cargo_all() {
-  basic_cargo_cmd $CLEAN_CMD "$@"
+  basic_cargo_cmd_wrapper $CLEAN_CMD "$@"
 }
 
 clean_cargo_macro_cache() {

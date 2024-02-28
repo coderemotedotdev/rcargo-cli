@@ -26,7 +26,9 @@ sync_local_to_remote() {
   source_rcargo_config
   # Use a list instead of an overly complex delimited string for rsync options 
   EXCLUDES=("${LOCAL_TO_REMOTE_SYNC_EXCLUDE[@]/#/--exclude=}")
-  RSYNC_OPTIONS=("-avzh" "${EXCLUDES[@]}" "$@")
+  # We use checksum to minimize files transferred and thus minimize files touched
+  # for rebuilding
+  RSYNC_OPTIONS=("-avzh" "--checksum" "${EXCLUDES[@]}" "$@")
 
   echo "rsync ${RSYNC_OPTIONS[@]} $LOCAL_DIR/ $USER@$REMOTE_HOSTNAME:$REMOTE_DIR"
   rsync "${RSYNC_OPTIONS[@]}" "$LOCAL_DIR/" "$USER@$REMOTE_HOSTNAME:$REMOTE_DIR"
@@ -36,7 +38,7 @@ sync_remote_to_local() {
   source_rcargo_config
   # Use a list instead of an overly complex delimited string for rsync options 
   EXCLUDES=("${REMOTE_TO_LOCAL_SYNC_EXCLUDE[@]/#/--exclude=}")
-  RSYNC_OPTIONS=("-avzh" "${EXCLUDES[@]}" "$@")
+  RSYNC_OPTIONS=("-avzh" "--checksum" "${EXCLUDES[@]}" "$@")
 
   echo "rsync ${RSYNC_OPTIONS[@]} $USER@$REMOTE_HOSTNAME:$REMOTE_DIR/ $LOCAL_DIR"
   rsync "${RSYNC_OPTIONS[@]}" "$USER@$REMOTE_HOSTNAME:$REMOTE_DIR/" "$LOCAL_DIR"
